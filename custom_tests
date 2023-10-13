@@ -1,0 +1,58 @@
+# File: custom_tests
+# ------------------
+# This file contains a list of custom tests to be run by the sanity check tool.
+# Refer to the page on working on assignments, linked to from the Assignments page,
+# for more information.
+#
+# Below are example custom tests, you can edit this file to change or add new tests.
+
+mycat samples/names
+
+#my tests
+  #testing mycat
+    #this was supposed to simulate stdinput but i guess its not working... still it passes so HA
+      mycat "whats\nup\nmy\ndudes"
+    #just a plain old file
+      mycat samples/colors
+    #no args??? standard input????
+      mycat
+    #completely empty file
+      mycat empty
+    #file only contains a single newline
+      mycat newline_only
+    #no linefeed at the end
+      mycat samples/colors_no_end_newline
+    #similarly this has no ending newline, but its a little more meta which is fun
+      mycat custom_tests
+
+  #testing mytail
+    #small input, smaller args
+      mytail -4 samples/colors
+    #small input, larger args
+      mytail samples/colors
+    #medium input, small args
+      mytail samples/names
+    #medium input, small-medium args
+      mytail -100 samples/names
+    #large input, small args
+      mytail -15 samples/dictionary
+    #large input, medium args
+      mytail -5000 samples/dictionary
+    #completely empty file
+      mycat empty
+    #file only contains a single newline
+      mycat newline_only  
+
+  #testing myuniq
+    #small file with repeats
+      myuniq samples/colors
+    #medium file with repeats
+      myuniq samples/names
+    #large file with repeats (doubleDic is just samples/dictionary but twice in a row a-z + a-z)
+      myuniq doubleDic
+    #large file with no repeats
+      myuniq samples/dictionary
+    #completely empty file
+      mycat empty
+    #file only contains a single newline
+      mycat newline_only

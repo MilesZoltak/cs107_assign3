@@ -1,0 +1,90 @@
+#include "samples/prototypes.h"
+#include <errno.h>
+#include <error.h>
+#include <stdio.h>
+
+#include <stdlib.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+
+/* initial estimate of number of uniq lines
+ * resize-as-you-go, add in increments of 100
+ */
+#define ESTIMATE 100
+
+//a struct that will represent a line type
+typedef struct file_line {
+    char *content;
+    int occurences;
+} file_line;
+
+void print_uniq_lines(FILE *fp) {
+    int lineCount = 0;    //number of lines read
+    int count = 0;    //represents amount of lines stored (and the next index to write to!)
+    
+    file_line *lines = malloc(ESTIMATE * sizeof(file_line));   //an array of line structs of length ESTIMATE, initially
+    assert(lines != NULL);
+    
+    bool unique = true;
+    //read a line into the first open space of lines[]
+    lines[count] = (file_line){read_line(fp), 1};
+    lineCount++;
+    while (lines[count].content != NULL) {
+        //loop backward through lines starting just before the newest addition
+        for (int i = count - 1; i >= 0; i--) {
+            unique = true;    //we will assume it to be a unique line until proven otherwise
+
+            //if the string is found to be the same as another in lines[]
+            if(strcmp(lines[count].content, lines[i].content) == 0) {
+                unique = false;
+                lines[i].occurences++;
+                i = -1;
+                free(lines[count].content);
+            }
+        }
+
+        count += !!unique;    //increment count if the line is unique
+
+        //if we need to allocate more space
+        if (count % ESTIMATE == 0 && count > count % ESTIMATE) {
+            lines = realloc(lines, ESTIMATE * ((count / ESTIMATE) + 1) * sizeof(file_line));
+            assert(lines != NULL);
+        }
+
+        //read a new line
+        lines[count] = (file_line){read_line(fp), 1};
+        lineCount++;
+    }
+    
+    //print out the lines
+    for (int i = 0; i < count; i++) {
+        printf("%7d %s\n", lines[i].occurences, lines[i].content);
+        free(lines[i].content);    //then free the pointer in this location
+    }
+    
+    free(lines);    //free the array of structs
+
+    
+    
+    
+}
+
+
+// ------- DO NOT EDIT ANY CODE BELOW THIS LINE (but do add comments!)  -------
+
+int main(int argc, char *argv[]) {
+    FILE *fp;
+
+    if (argc == 1) {
+        fp = stdin;
+    } else {
+        fp = fopen(argv[1], "r");
+        if (fp == NULL) {
+            error(1, errno, "cannot access '%s'", argv[1]);
+        }
+    }
+    print_uniq_lines(fp);
+    fclose(fp);
+    return 0;
+}
